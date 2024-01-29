@@ -27,6 +27,11 @@
           "class": "section-separated"
         },
         {
+          "id": "gaming",
+          "name": "Gaming",
+          "route": "/#gaming"
+        },
+        {
           "id": "technologies",
           "name": "Technologien",
           "route": "/#technologies"
