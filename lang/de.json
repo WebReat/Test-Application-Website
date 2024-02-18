@@ -27,9 +27,9 @@
           "class": "section-separated"
         },
         {
-          "id": "music",
-          "name": "Musik",
-          "route": "/#music"
+          "id": "media",
+          "name": "Medien",
+          "route": "/#media"
         },
         {
           "id": "technologies",
