@@ -1751,14 +1751,14 @@
     }
   },
   "pages": {
-    "icon": {
-      "name": "exclamationmark.triangle.fill",
-      "colors": {
-        "primary": "var(--color-fill)",
-        "tertiary": "var(--color-default-yellow)"
-      }
-    },
     "notFound": {
+      "icon": {
+        "name": "exclamationmark.triangle.fill",
+        "colors": {
+          "primary": "var(--color-fill)",
+          "tertiary": "var(--color-system-yellow)"
+        }
+      },
       "title": "Not Found.",
       "description": "Die Seite, die du suchst, kann nicht gefunden werden. Bitte überprüfe sie und versuche es erneut.",
       "links": []
@@ -1768,7 +1768,7 @@
         "name": "exclamationmark.octagon.fill",
         "colors": {
           "primary": "var(--color-fill)",
-          "tertiary": "var(--color-default-red)"
+          "tertiary": "var(--color-system-red)"
         }
       },
       "title": "Error.",
@@ -1779,7 +1779,7 @@
       "icon": {
         "name": "wrench.and.screwdriver.fill",
         "colors": {
-          "secondary": "var(--color-default-blue)"
+          "secondary": "var(--color-system-blue)"
         }
       },
       "title": "Be right back.",

@@ -4,21 +4,30 @@
       class="social-option"
       v-for="(link, index) in links"
       :key="index"
-      v-animation="{ toggle: ['visible'] }"
+      v-animation="{ add: 'visible' }"
     >
-      <a class="link" :href="link.url" :title="link.title" target="_blank">
-        <font-awesome-icon :icon="`fa-${link.category} fa-${link.icon.name}`" />
-      </a>
+      <NuxtLink
+        class="link"
+        :href="link.url"
+        :title="link.title"
+        target="_blank"
+      >
+        <ClientOnly>
+          <font-awesome-icon
+            :icon="`fa-${link.category} fa-${link.icon.name}`"
+          />
+        </ClientOnly>
+      </NuxtLink>
     </li>
   </ul>
 </template>
 
 <script setup lang="ts">
-import type { FaLinkType } from "~/types/common/FaLink";
+import type { FaLinkType } from '~/types/common/FaLink';
 
 const { tm } = useI18n();
 const links: Ref<FaLinkType[]> = computed(() =>
-  tm("components.common.ShareSheet.links"),
+  tm('components.common.ShareSheet.links')
 );
 </script>
 
@@ -53,10 +62,14 @@ const links: Ref<FaLinkType[]> = computed(() =>
 }
 
 .sharesheet-options .social-option {
+  opacity: 0;
+}
+
+.sharesheet-options .social-option.visible {
   opacity: 1;
 }
 
-.sharesheet-options .social-option {
+.sharesheet-options .social-option.visible {
   animation: FadeIn 0.2s linear;
   -webkit-animation: FadeIn 0.2s linear;
   animation-fill-mode: both;
@@ -86,6 +99,6 @@ const links: Ref<FaLinkType[]> = computed(() =>
 /* ------------------------------------ a ----------------------------------- */
 
 .sharesheet-options .social-option a {
-  color: #666;
+  color: var(--color-fill-gray-secondary);
 }
 </style>

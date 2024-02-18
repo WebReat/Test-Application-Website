@@ -12,11 +12,15 @@
       <ul ref="ul" class="timeline">
         <CardItem
           variant="article"
-          :size="windowObject.innerWidth < 900 ? 'small' : 'medium'"
+          :size="
+            windowObject && windowObject.innerWidth < 900 ? 'small' : 'medium'
+          "
           v-for="(project, index) in currentProjects"
           :key="index"
           :card="project"
-          :iconPosition="windowObject.innerWidth < 900 ? 'top' : 'left'"
+          :iconPosition="
+            windowObject && windowObject.innerWidth < 900 ? 'top' : 'left'
+          "
           :dateFormatOptions="{
             year: 'numeric',
             month: 'long',
@@ -59,10 +63,6 @@
 </template>
 
 <script lang="ts">
-import {
-  listPinnedRepositories,
-  listUserRepositories,
-} from "~/helpers/github-helper";
 import type { ListUserReposResponse } from "~/types/GitHub/Repository";
 import type { CardItemType } from "~/types/common/CardItem";
 

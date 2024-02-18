@@ -9,18 +9,22 @@
   >
     <component :title="section.name" :is="`${section.id}Section`" />
   </section>
-
-  <!-- insert Music Library here -->
-  <!-- insert Galaxy Game here -->
 </template>
 
 <script setup lang="ts">
-import "~/assets/css/main.css";
 import type { SectionType } from "~/types/common/Section";
+
+definePageMeta({
+  header: true,
+  nav: true,
+  ribbon: true,
+  footerFull: true,
+  footerCompact: false,
+});
 
 const { tm } = useI18n();
 const sections: Ref<SectionType[]> = computed(() =>
-  tm("components.common.NavBar"),
+  tm("components.common.NavBar")
 );
 </script>
 

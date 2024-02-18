@@ -1,10 +1,8 @@
 <template>
-  <a class="links">
+  <NuxtLink class="links">
     <component
       :is="
-        link.url.startsWith('#') || link.url.startsWith('/')
-          ? 'router-link'
-          : 'a'
+        link.url.startsWith('#') || link.url.startsWith('/') ? 'NuxtLink' : 'a'
       "
       v-for="(link, index) in links"
       :key="index"
@@ -17,10 +15,10 @@
           ? '_self'
           : '_blank'
       "
-      class="link"
+      :class="['link', { 'animate-color': shouldAnimate }]"
     >
-      {{ link.title
-      }}<Icon
+      {{ link.title }}
+      <Icon
         v-if="link.icon"
         :name="link.icon.name"
         :size="link.icon.size"
@@ -28,20 +26,16 @@
         class="icon icon-small"
       />
     </component>
-  </a>
+  </NuxtLink>
 </template>
 
 <script setup lang="ts">
 import type { LinkType } from "~/types/common/Link";
 
-const props = withDefaults(
-  defineProps<{
-    links: LinkType[];
-  }>(),
-  {
-    links: () => [],
-  },
-);
+const props = defineProps({
+  links: Array as () => LinkType[],
+  shouldAnimate: Boolean,
+});
 
 const { links } = toRefs(props);
 </script>
@@ -69,7 +63,7 @@ const { links } = toRefs(props);
 
 /* ------------------------------- ribbon-link ------------------------------ */
 
-.ribbon-blue-to-default .ribbon-link .link {
+.ribbon-blue-to-default .ribbon-link .link.animate-color {
   color: white;
   animation: animate-color-fff-06c 1s ease-in-out 1.8s forwards;
 }

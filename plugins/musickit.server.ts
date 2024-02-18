@@ -1,7 +1,6 @@
-import { listRepositoryTags } from "~/helpers/github-helper";
-import { MusicKitHelper } from "../helpers/musickit-helper";
-
 export default defineNuxtPlugin(async (nuxtApp) => {
+  // const { appleDeveloperToken } = useRuntimeConfig();
+  const appleDeveloperToken = import.meta.env.VITE_APPLE_DEVELOPER_TOKEN;
   const tags: Ref<{
     latest: string | undefined;
     previous: string | undefined;
@@ -41,7 +40,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
       const musicKitInstance = window.MusicKit.getInstance();
       const musicKitHelper = new MusicKitHelper(musicKitInstance);
 
-      const developerToken = import.meta.env.VITE_APPLE_DEVELOPER_TOKEN;
       const appConfiguration = {
         name: "Application-Website",
         build: tags.value.latest || "1.0.0",
@@ -49,7 +47,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         icon: "~/assets/img/favicon.png",
       };
 
-      musicKitHelper.configureMusicKit(developerToken, appConfiguration);
+      musicKitHelper.configureMusicKit(appleDeveloperToken, appConfiguration);
     } catch (error) {
       console.error("MusicKit initialization error:", error);
     }

@@ -1,3 +1,5 @@
+import routerOptions from "./router.options";
+
 export default defineNuxtConfig({
   modules: [
     "@nuxtjs/tailwindcss",
@@ -5,7 +7,10 @@ export default defineNuxtConfig({
     "@nuxtjs/color-mode",
     "@nuxt/image",
   ],
-  css: ["@fortawesome/fontawesome-svg-core/styles.css"],
+  css: [
+    "~/assets/css/main.css",
+    "@fortawesome/fontawesome-svg-core/styles.css",
+  ],
   devtools: {
     enabled: true,
     timeline: {
@@ -16,17 +21,11 @@ export default defineNuxtConfig({
     typeCheck: true,
     strict: true,
   },
+  ssr: false,
   app: {
     head: {
       meta: [
-        { charset: "utf-8" },
         {
-          "http-equiv": "X-UA-Compatible",
-          content: "IE=edge",
-        },
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
-        {
-          hid: "description",
           name: "description",
           content:
             "Discover the work of Jonathan Russ and learn more about him, including his projects at Swisscom.",
@@ -43,6 +42,17 @@ export default defineNuxtConfig({
               },
             ],
       title: "Jonathan Russ",
+    },
+  },
+  router: {
+    options: routerOptions,
+  },
+  runtimeConfig: {
+    githubToken: process.env.GITHUB_TOKEN,
+    appleDeveloperToken: process.env.APPLE_DEVELOPER_TOKEN,
+
+    public: {
+      environment: process.env.NODE_ENV,
     },
   },
   components: {
