@@ -1,31 +1,29 @@
 <template>
   <section
     v-for="(section, index) in sections"
-    :name="section.name"
-    :key="section.id"
     :id="section.id"
-    :class="section.class"
+    :key="section.id"
     v-section="(section.id, index)"
+    :name="section.name"
+    :class="section.class"
   >
-    <component :title="section.name" :is="`${section.id}Section`" />
+    <component :is="`${section.id}Section`" :title="section.name" />
   </section>
 </template>
 
 <script setup lang="ts">
-import type { SectionType } from "~/types/common/Section";
+import type { SectionType } from '~/types/common/Section'
 
 definePageMeta({
   header: true,
   nav: true,
   ribbon: true,
   footerFull: true,
-  footerCompact: false,
-});
+  footerCompact: false
+})
 
-const { tm } = useI18n();
-const sections: Ref<SectionType[]> = computed(() =>
-  tm("components.common.NavBar")
-);
+const { tm } = useI18n()
+const sections = computed<SectionType[]>(() => tm('components.common.NavBar'))
 </script>
 
 <style scoped>
@@ -39,7 +37,7 @@ const sections: Ref<SectionType[]> = computed(() =>
   left: 0;
   right: 0;
   bottom: 0;
-  background: url(~/assets/img/lines.jpg);
+  background: url(/img/lines.jpg);
   z-index: 10;
   background-size: 7px auto;
   mix-blend-mode: overlay;
@@ -70,7 +68,7 @@ const sections: Ref<SectionType[]> = computed(() =>
   left: 0;
   right: 0;
   bottom: 0;
-  background: url(~/assets/img/vignette.png);
+  background: url(/img/vignette.png);
   z-index: 11;
   background-size: 100% 100%;
   mix-blend-mode: overlay;

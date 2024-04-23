@@ -2,13 +2,13 @@
   <component
     :is="variant === 'article' ? 'div' : 'a'"
     :id="card.title?.toLowerCase().replace(/ /g, '-')"
+    v-animation="{
+      add: 'scroll-animation--on',
+      remove: 'scroll-animation--off'
+    }"
     :href="applyHover && card.links ? card.links[0].url : card.html_url"
     :class="['scroll-animation scroll-animation--off', variant, size]"
     target="_blank"
-    v-animation="{
-      add: 'scroll-animation--on',
-      remove: 'scroll-animation--off',
-    }"
   >
     <div v-if="cover || donutGraph || barGraph" class="card-cover-wrap">
       <picture v-if="cover" class="card-cover">
@@ -21,7 +21,7 @@
             <span>Hispanic/Latinx</span>
           </p>
           <div class="bar-container">
-            <div class="bar" data-bar style="width: 27.1%"></div>
+            <div class="bar" data-bar style="width: 27.1%"/>
           </div>
         </div>
         <div class="group group-white typography-body-tight">
@@ -30,7 +30,7 @@
             <span>White</span>
           </p>
           <div class="bar-container">
-            <div class="bar" data-bar style="width: 39.7%"></div>
+            <div class="bar" data-bar style="width: 39.7%"/>
           </div>
         </div>
       </div>
@@ -41,11 +41,11 @@
               <path
                 class="ac-graph-path donut-wedge wedge-1"
                 d="M 113.99911851558227 0.07271925905595822 A 110 110 0 0 1 106.00088148441777 219.92728074094404 A 110 110 0 0 1 25.14997985191927 180.00338621002766 L 32.09225422767132 174.27583642920723 A 101 101 0 0 0 106.32808209023814 210.93323049850318 A 101 101 0 0 0 113.6719179097619 9.066769501496836 Z"
-              ></path>
+              />
               <path
                 class="ac-graph-path donut-wedge wedge-2"
                 d="M 20.287609232531437 173.6528628011735 A 110 110 0 0 1 105.31027149295572 0.10001616683369718 L 105.69397655262298 9.09183302591093 A 101 101 0 0 0 27.62771393168795 168.44490129925933 Z"
-              ></path>
+              />
             </svg>
           </figure>
           <h4
@@ -58,14 +58,14 @@
         <div class="wedge-legend typography-donut-label female">
           <span>
             <span class="semibold">Female</span>
-            <br />
+            <br >
             <span data-value>35.3</span>%
           </span>
         </div>
         <div class="wedge-legend typography-donut-label male">
           <span>
             <span class="semibold">Male</span>
-            <br />
+            <br >
             <span data-value>64.6</span>%
           </span>
         </div>
@@ -75,41 +75,91 @@
       class="details"
       :style="{
         'flex-direction': getFlexDirection(),
-        'align-items': getAlignItems(),
+        'align-items': getAlignItems()
       }"
     >
       <Icon
         v-if="card.icon"
+        :loading="loading"
         :name="card.icon?.name"
         :size="card.icon?.size"
         :colors="card.icon?.colors"
         :class="[
           'icon',
           {
-            'icon-large': variant === 'article' && size === 'large',
+            'icon-large': variant === 'article' && size === 'large'
           },
           {
-            'icon-xlarge': size === 'medium' || size === 'small',
+            'icon-xlarge': size === 'medium' || size === 'small'
           },
           {
-            'icon-xxlarge': variant === 'card' && size === 'large',
-          },
+            'icon-xxlarge': variant === 'card' && size === 'large'
+          }
         ]"
+        :style="{
+          position: props.iconAbsolute ? 'absolute' : 'relative'
+        }"
       />
       <div class="body">
-        <div v-if="card.eyebrow" class="eyebrow">{{ card.eyebrow }}</div>
-        <div class="title-wrapper">
-          <div class="title">{{ card.title || card.name }}</div>
-          <Badge v-if="card.archived" title="Public archive" color="yellow" />
+        <div class="eyebrow">
+          <template v-if="!loading">
+            {{ card.eyebrow }}
+          </template>
+          <template v-else>
+            <LoadingSkeleton width="150px" height="15px" />
+          </template>
         </div>
-        <div v-if="card.description" class="card-content">
+        <div class="title-wrapper">
+          <div class="title">
+            <template v-if="!loading">
+              {{ card.title || card.name }}
+            </template>
+            <template v-else>
+              <LoadingSkeleton width="200px" height="15px" />
+            </template>
+          </div>
+
+          <Badge
+            v-if="card.archived"
+            title="Public archive"
+            size="xsmall"
+            :loading="loading"
+            :colors="{
+              primary: 'var(--color-figure-yellow)',
+              tertiary: 'var(--color-figure-yellow)'
+            }"
+            border
+            :hover="false"
+          />
+          <Badge
+            v-if="card.badge"
+            :title="card.badge.title"
+            :icon="card.badge.icon"
+            :loading="loading"
+            :colors="{
+              primary: `var(--color-figure-${colorBadge?.colorName})`,
+              tertiary: `var(--color-figure-${colorBadge?.colorName})`
+            }"
+            hover
+            border
+          />
+        </div>
+        <div class="card-content">
           <div class="content">
-            {{ card.description }}
+            <template v-if="!loading">
+              {{ card.description }}
+            </template>
+            <template v-else>
+              <LoadingSkeleton width="300px" height="15px" />
+              <LoadingSkeleton width="300px" height="15px" />
+              <LoadingSkeleton width="250px" height="15px" />
+            </template>
           </div>
         </div>
-        <TagBar
+        <BadgeBar
           v-if="card.tags?.length || card.topics?.length"
-          :tags="card.tags || card.topics"
+          :badges="card.tags || card.topics"
+          :loading="loading"
         />
         <div v-if="card.links?.length || card.html_url" class="ctas-wrapper">
           <!-- <ButtonItem variant="secondary" size="small"> Test </ButtonItem> -->
@@ -125,11 +175,12 @@
                   title: 'Mehr erfahren',
                   url: card.html_url,
                   icon: {
-                    name: 'chevron.right',
-                  },
-                },
+                    name: 'chevron.right'
+                  }
+                }
               ]
             "
+            :loading="loading"
             :class="{ link: applyHover }"
           />
         </div>
@@ -157,35 +208,43 @@
               stars: card.stargazers_count,
               issues: card.open_issues_count,
               subscribers: card.subscribers_count,
-              date: card.updated_at,
+              date: card.updated_at
             }
           "
           :date="card.updated_at"
-          :dateFormatOptions="dateFormatOptions"
-          :dateNowKey="dateNowKey"
+          :date-format-options="dateFormatOptions"
+          :date-now-key="dateNowKey"
+          :loading="loading"
         />
       </div>
+      <LanguageBarV2 v-if="language" :language="language" style="width: 100%" />
     </div>
   </component>
 </template>
 
 <script setup lang="ts">
-import type { ListUserReposResponse } from '~/types/GitHub/Repository';
-import type { CardItemType } from '~/types/common/CardItem';
+import type { ListUserReposResponse } from '~/types/GitHub/Repository'
+import type { BadgeType } from '~/types/common/Badge'
+import type { CardItemType } from '~/types/common/CardItem'
+import type { LanguageBarType } from '~/types/common/LanguageBar'
 
 const props = withDefaults(
   defineProps<{
-    card: CardItemType | ListUserReposResponse | any;
-    variant?: 'card' | 'article';
-    dateFormatOptions?: Intl.DateTimeFormatOptions;
-    dateNowKey?: 'created' | 'updated';
-    iconPosition?: 'top' | 'right' | 'bottom' | 'left';
-    iconAlignment?: 'start' | 'center' | 'end';
-    size?: 'small' | 'medium' | 'large' | 'full';
-    hover?: 'auto' | 'true' | 'false';
-    cover?: string;
-    donutGraph?: boolean;
-    barGraph?: boolean;
+    card: CardItemType | ListUserReposResponse | any
+    variant?: 'card' | 'article'
+    dateFormatOptions?: Intl.DateTimeFormatOptions
+    dateNowKey?: 'created' | 'updated'
+    iconPosition?: 'top' | 'right' | 'bottom' | 'left'
+    iconAlignment?: 'start' | 'center' | 'end'
+    iconAbsolute?: boolean
+    size?: 'small' | 'medium' | 'large' | 'full'
+    hover?: 'auto' | 'true' | 'false'
+    cover?: string
+    badge?: BadgeType
+    language?: LanguageBarType
+    donutGraph?: boolean
+    barGraph?: boolean
+    loading?: boolean
   }>(),
   {
     card: () => {},
@@ -195,19 +254,23 @@ const props = withDefaults(
       return {
         year: 'numeric',
         month: 'long',
-        day: 'numeric',
-      };
+        day: 'numeric'
+      }
     },
 
     dateNowKey: 'updated',
-    iconPosition: 'left',
+    iconPosition: 'top',
     iconAlignment: 'start',
+    iconAbsolute: false,
     size: 'medium',
     hover: 'auto',
     donutGraph: false,
     barGraph: false,
+    loading: false
   }
-);
+)
+
+const { colorBadge } = useColor()
 
 const applyHover = computed(() => {
   return (
@@ -215,35 +278,35 @@ const applyHover = computed(() => {
       props.card.links &&
       props.card.links.length === 1) ||
     props.hover === 'true'
-  );
-});
+  )
+})
 
 const getFlexDirection = () => {
   switch (props.iconPosition) {
     case 'top':
-      return 'column';
+      return 'column'
     case 'right':
-      return 'row-reverse';
+      return 'row-reverse'
     case 'bottom':
-      return 'column-reverse';
+      return 'column-reverse'
     case 'left':
     default:
-      return 'row';
+      return 'row'
   }
-};
+}
 
 const getAlignItems = () => {
   switch (props.iconAlignment) {
     case 'start':
-      return 'flex-start';
+      return 'flex-start'
     case 'center':
-      return 'center';
+      return 'center'
     case 'end':
-      return 'flex-end';
+      return 'flex-end'
     default:
-      return 'flex-start';
+      return 'flex-start'
   }
-};
+}
 </script>
 
 <style scoped>
@@ -383,19 +446,30 @@ const getAlignItems = () => {
 }
 
 .details {
+  position: relative;
   width: 100%;
   height: 100%;
   display: flex;
+  /* flex-wrap: wrap; */
   align-items: center;
   gap: 12px;
   z-index: 1;
   /* background-color: var(--color-fill); */
+}
+
+.xsmall .details {
   padding: 20px;
-  position: relative;
+
   font-size: 14px;
-  line-height: 1.2857742857;
   font-weight: 400;
-  /* letter-spacing: -0.016em; */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
+}
+
+.small .details {
+  padding: 22px;
+  font-size: 15px;
+  font-weight: 400;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -404,9 +478,7 @@ const getAlignItems = () => {
   gap: 24px;
   padding: 32px;
   font-size: 17px;
-  line-height: 1.4705882353;
   font-weight: 400;
-  /* letter-spacing: -0.022em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -414,18 +486,14 @@ const getAlignItems = () => {
 .large .details {
   padding: 44px;
   font-size: 20px;
-  line-height: 1.6470588235;
   font-weight: 400;
-  /* letter-spacing: -0.028em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
 
 .full .details {
   font-size: 17px;
-  line-height: 1.4705882353;
   font-weight: 400;
-  /* letter-spacing: -0.022em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
   width: 100%;
@@ -444,9 +512,7 @@ const getAlignItems = () => {
 
 .full .details {
   font-size: 14px;
-  line-height: 1.2857742857;
   font-weight: 400;
-  /* letter-spacing: -0.016em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -459,7 +525,6 @@ const getAlignItems = () => {
 
 .body {
   width: 100%;
-  height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -473,37 +538,39 @@ const getAlignItems = () => {
   color: var(--color-figure-gray-secondary);
   display: block;
   margin: 0;
+}
+
+.xsmall .eyebrow {
   font-size: 14px;
-  line-height: 1.2857742857;
   font-weight: 600;
-  /* letter-spacing: -0.016em; */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
+}
+
+.small .eyebrow {
+  font-size: 15px;
+  font-weight: 600;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
 
 .medium .eyebrow {
   font-size: 17px;
-  line-height: 1.2353641176;
   font-weight: 600;
-  /* letter-spacing: -0.024em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
 
 .large .eyebrow {
   font-size: 20px;
-  line-height: 1.4705882353;
   font-weight: 600;
-  /* letter-spacing: -0.032em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
 
 .full .eyebrow {
   font-size: 17px;
-  line-height: 1.2353641176;
   font-weight: 600;
-  /* letter-spacing: -0.024em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
   color: var(--color-welcome-featured-card-eyebrow-text);
@@ -518,32 +585,16 @@ const getAlignItems = () => {
   gap: 10px;
 }
 
-.title {
-  color: var(--color-card-content-text);
-  font-size: 17px;
-  line-height: 1.2353641176;
-  font-weight: 600;
-  /* letter-spacing: -0.024em; */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
-    'Helvetica', 'Arial', sans-serif;
-}
-
-.title {
-  color: var(--color-card-content-text);
-  font-size: 17px;
-  line-height: 1.2353641176;
-  font-weight: 600;
-  /* letter-spacing: -0.024em; */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
-    'Helvetica', 'Arial', sans-serif;
-}
-
-.title {
+.xsmall .title {
   font-size: 14px;
-  /* 21.8581628569 */
-  line-height: 1.2857742857;
   font-weight: 600;
-  /* letter-spacing: -0.016em; */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
+}
+
+.small .title {
+  font-size: 17px;
+  font-weight: 600;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -551,18 +602,14 @@ const getAlignItems = () => {
 .medium .title {
   font-size: 21px;
   /* 20.2380952385px */
-  line-height: 1.1904761905;
   font-weight: 600;
-  /* letter-spacing: 0.011em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
 
 .large .title {
   font-size: 28px;
-  line-height: 1.0947058824;
   font-weight: 600;
-  /* letter-spacing: 0.032em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 
@@ -572,9 +619,7 @@ const getAlignItems = () => {
 
 .full .title {
   font-size: 21px;
-  line-height: 1.1904761905;
   font-weight: 600;
-  /* letter-spacing: 0.011em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -660,9 +705,7 @@ const getAlignItems = () => {
 
 .typography-body-tight {
   font-size: 17px;
-  line-height: 1.2353641176;
   font-weight: 400;
-  /* letter-spacing: 0em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -682,9 +725,7 @@ const getAlignItems = () => {
   .group {
     padding: 0;
     font-size: 14px;
-    line-height: 1.2857742857;
     font-weight: 400;
-    /* letter-spacing: -0.016em; */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
@@ -759,9 +800,7 @@ br.medium {
 
 .typography-donut-label {
   font-size: 17px;
-  line-height: 1.2353641176;
   font-weight: 600;
-  /* letter-spacing: 0em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -769,9 +808,7 @@ br.medium {
 @media only screen and (max-width: 1068px) {
   .typography-donut-label {
     font-size: 17px;
-    line-height: 1.2353641176;
     font-weight: 600;
-    /* letter-spacing: 0em; */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
@@ -780,9 +817,7 @@ br.medium {
 @media only screen and (max-width: 734px) {
   .typography-donut-label {
     font-size: 14px;
-    line-height: 1.2857742857;
     font-weight: 600;
-    /* letter-spacing: -0.016em; */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
@@ -809,9 +844,7 @@ br.medium {
 
 .typography-donut-label {
   font-size: 17px;
-  line-height: 1.2353641176;
   font-weight: 600;
-  /* letter-spacing: 0em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
@@ -819,9 +852,7 @@ br.medium {
 @media only screen and (max-width: 1068px) {
   .typography-donut-label {
     font-size: 17px;
-    line-height: 1.2353641176;
     font-weight: 600;
-    /* letter-spacing: 0em; */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
@@ -830,9 +861,7 @@ br.medium {
 @media only screen and (max-width: 734px) {
   .typography-donut-label {
     font-size: 14px;
-    line-height: 1.2857742857;
     font-weight: 600;
-    /* letter-spacing: -0.016em; */
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
@@ -1008,9 +1037,7 @@ svg.ac-graph-svg {
 
 .tile-category {
   font-size: 12px;
-  line-height: 1.33337;
   font-weight: 700;
-  /* letter-spacing: -0.01em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }

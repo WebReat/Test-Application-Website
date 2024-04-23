@@ -10,17 +10,9 @@
   width: 44px;
   pointer-events: all;
   font-size: 19px;
-  line-height: 1.4211;
   font-weight: 400;
-  letter-spacing: 0.012em;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Helvetica Neue",
-    "Helvetica",
-    "Arial",
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   align-items: center;
   border-radius: 50%;
   cursor: pointer;
@@ -41,17 +33,9 @@
 @media only screen and (max-width: 1068px) {
   .cta-circular-icon {
     font-size: 17px;
-    line-height: 1.47059;
     font-weight: 400;
-    letter-spacing: -0.022em;
-    font-family:
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Helvetica Neue",
-      "Helvetica",
-      "Arial",
-      sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+      'Helvetica', 'Arial', sans-serif;
   }
 }
 .cta-circular-icon {

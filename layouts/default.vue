@@ -2,7 +2,7 @@
   <SpeedInsights />
   <header v-if="shouldShow('header')">
     <NavBar v-if="shouldShow('nav')" />
-    <RibbonBar v-if="shouldShow('ribbon')" />
+    <RibbonBar v-if="shouldShow('ribbon')" :loading="false" />
   </header>
   <main>
     <slot />
@@ -13,82 +13,75 @@
 </template>
 
 <script setup lang="ts">
-import { SpeedInsights } from "@vercel/speed-insights/vue";
-import svgFaviconDev from "~/assets/img/dev/favicon-dev.svg?raw";
-import svgFavicon from "~/assets/img/favicon.svg?raw";
-import FooterCompact from "~/components/common/Footer/Compact.vue";
-import FooterFull from "~/components/common/Footer/Full.vue";
+import { SpeedInsights } from '@vercel/speed-insights/vue'
+import FooterCompact from '~/components/common/Footer/Compact.vue'
+import FooterFull from '~/components/common/Footer/Full.vue'
+import svgFaviconDev from '~/public/img/dev/favicon-dev.svg?raw'
 
-const route = useRoute();
-const { colorBadge, randomizeColor } = useColor();
-const { currentSection } = useSection();
-const { locale } = useI18n();
+const route = useRoute()
+const { colorBadge, randomizeColor } = useColor()
+const { currentSection } = useSection()
+const { locale } = useI18n()
+const error = useError()
+const config = useRuntimeConfig()
 
-onMounted(randomizeColor);
+const faviconColor = colorBadge.value?.colorHex ?? '000000'
+const faviconGraphicData = `data:image/svg+xml,${encodeURIComponent(
+  svgFaviconDev.replace('#color', `#${faviconColor}`)
+)}`
 
-const isDevelopment = ref(process.env.NODE_ENV === "development");
-
-const faviconBase = computed(() =>
-  isDevelopment.value ? svgFaviconDev : svgFavicon
-);
-const appleTouchIconBase = computed(
-  () =>
-    `~/assets/img/${
-      isDevelopment.value
-        ? `dev/favicon-dev-${colorBadge.value?.colorName}.png`
-        : "favicon.png"
-    }`
-);
+onMounted(randomizeColor)
 
 watchEffect(() => {
-  const faviconColor = colorBadge.value?.colorHex ?? "000000";
-  const faviconData = `data:image/svg+xml,${encodeURIComponent(
-    faviconBase.value.replace("#color", `#${faviconColor}`)
-  )}`;
-
   useHead({
-    link: [
-      { rel: "icon", type: "image/svg+xml", href: faviconData },
-      { rel: "apple-touch-icon", href: appleTouchIconBase.value },
-    ],
-  });
-});
+    htmlAttrs: { lang: locale.value },
+    title: currentSection.value.name
+  })
+
+  if (config.public.appEnvironment === 'development') {
+    useHead({
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: faviconGraphicData },
+        {
+          rel: 'apple-touch-icon',
+          href: `/img/dev/favicon-dev-${colorBadge.value?.colorName}.png`
+        }
+      ],
+      meta: [
+        {
+          property: 'twitter:image',
+          content: `/img/dev/favicon-dev-${colorBadge.value?.colorName}.png`
+        },
+        {
+          property: 'og:image',
+          content: `/img/dev/favicon-dev-${colorBadge.value?.colorName}.png`
+        }
+      ]
+    })
+  }
+})
+
+const errorConfig = {
+  header: false,
+  nav: false,
+  ribbon: false,
+  footerFull: false,
+  footerCompact: true
+}
 
 const shouldShow = (component: string) =>
-  route.meta[component] ??
-  {
-    header: false,
-    nav: false,
-    ribbon: false,
-    footerFull: false,
-    footerCompact: true,
-  }[component];
+  error.value
+    ? errorConfig[component as keyof typeof errorConfig]
+    : route.meta[component]
 
 const footerClass = computed(() => ({
-  "footer-full": shouldShow("footerFull"),
-  "footer-compact": shouldShow("footerCompact"),
-}));
+  'footer-full': shouldShow('footerFull'),
+  'footer-compact': shouldShow('footerCompact')
+}))
 
 const footerComponent = computed(() =>
-  shouldShow("footerFull") ? FooterFull : FooterCompact
-);
-
-const pageTitle = computed(() =>
-  currentSection.value.name
-    ? `JR | ${currentSection.value.name}`
-    : "Jonathan Russ"
-);
-
-useHead({
-  htmlAttrs: { lang: locale.value },
-  title: pageTitle,
-  script: [
-    {
-      src: "https://js-cdn.music.apple.com/musickit/v1/musickit.js",
-      async: true,
-    },
-  ],
-});
+  shouldShow('footerFull') ? FooterFull : FooterCompact
+)
 </script>
 
 <style>

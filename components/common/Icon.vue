@@ -1,43 +1,44 @@
 <template>
-  <svg :style="styles">
-    <use :href="icon" />
-  </svg>
+  <template v-if="!loading">
+    <svg :style="styles">
+      <use :href="icon" /></svg
+  ></template>
 </template>
 
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
-    name: string;
-    size?: "small" | "medium" | "large";
+    name: string
+    size?: 'small' | 'medium' | 'large'
+    loading?: boolean
     colors?: {
-      primary?: string;
-      secondary?: string;
-      tertiary?: string;
-    };
+      primary?: string
+      secondary?: string
+      tertiary?: string
+    }
   }>(),
   {
-    size: "medium",
-
+    size: 'medium',
+    loading: false,
     colors: () => ({
-      primary: "currentColor",
-      secondary: "currentColor",
-      tertiary: "currentColor",
-    }),
-  },
-);
+      primary: 'currentColor',
+      secondary: 'currentColor',
+      tertiary: 'currentColor'
+    })
+  }
+)
 
-const icon = computed(() => `${getSpriteUrl(props.size)}#${props.name}`);
+const icon = computed(() => `${getSpriteUrl(props.size)}#${props.name}`)
 
-const getSpriteUrl = (size: "small" | "medium" | "large") => {
-  return new URL(`/assets/icons/${size}/symbol/sprite.svg`, import.meta.url)
-    .href;
-};
+const getSpriteUrl = (size: 'small' | 'medium' | 'large') => {
+  return `/icons/${size}/symbol/sprite.svg`
+}
 
 const styles = reactive({
-  "--color-primary": props.colors.primary || "currentColor",
-  "--color-secondary": props.colors.secondary || "currentColor",
-  "--color-tertiary": props.colors.tertiary || "currentColor",
-});
+  '--color-primary': props.colors.primary || 'currentColor',
+  '--color-secondary': props.colors.secondary || 'currentColor',
+  '--color-tertiary': props.colors.tertiary || 'currentColor'
+})
 </script>
 
 <style>
@@ -80,17 +81,5 @@ const styles = reactive({
   fill: none;
   stroke: var(--color-fill-gray);
   stroke-width: 0.2;
-}
-
-.media-icon {
-  width: 5em;
-  height: 5em;
-}
-
-@media screen and (min-width: 1069px) {
-  .media-icon {
-    width: 10em;
-    height: 10em;
-  }
 }
 </style>

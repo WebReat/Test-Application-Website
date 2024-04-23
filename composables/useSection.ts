@@ -1,19 +1,22 @@
 export const useSection = () => {
-  const currentSection = useState("currentSection", () => ({
+  const currentSection = useState('currentSection', () => ({
+    id: null as string | null,
     name: null as string | null,
-    index: null as number | null,
-  }));
+    index: null as number | null
+  }))
 
-  const setCurrentSection = (sectionName: string, sectionIndex: number) => {
-    const modifiedSectionName = sectionName.replace(/^\w/, (c) =>
-      c.toUpperCase(),
-    );
-    currentSection.value.name = modifiedSectionName;
-    currentSection.value.index = sectionIndex;
-  };
+  const setCurrentSection = (
+    sectionId: string,
+    sectionName: string,
+    sectionIndex: number
+  ) => {
+    currentSection.value.id = sectionId
+    currentSection.value.name = sectionName.replace(/^\w/, c => c.toUpperCase())
+    currentSection.value.index = sectionIndex
+  }
 
   return {
     currentSection,
-    setCurrentSection,
-  };
-};
+    setCurrentSection
+  }
+}

@@ -1,68 +1,124 @@
 <template>
-  <span class="badge" :style="`--color-figure: var(--color-figure-${color})`">
+  <component
+    :is="variant"
+    :href="url"
+    :class="['badge', size, { hover }, { loading }]"
+    :style="computedStyle"
+    @click="onClick"
+  >
     <Icon
       v-if="icon"
+      class="icon icon-medium mr-1"
+      :loading="loading"
       :name="icon.name"
       :size="icon.size"
       :colors="icon.colors"
     />
-    {{ title }}
-  </span>
+    <template v-if="!loading">
+      {{ title }}
+    </template>
+    <template v-else>
+      <LoadingSkeleton width="80px" height="15px" />
+    </template>
+  </component>
 </template>
 
 <script setup lang="ts">
-import type { IconType } from "~/types/common/Icon";
+import type { BadgeType } from '~/types/common/Badge'
 
-withDefaults(
-  defineProps<{
-    title: string;
-    color?: string;
-    icon?: IconType;
-  }>(),
-  {
-    color: "blue",
-  },
-);
+const props = withDefaults(defineProps<BadgeType>(), {
+  variant: 'a',
+  size: 'medium',
+  colors: () => ({
+    primary: 'var(--color-fill-gray)',
+    secondary: 'var(--color-fill-tertiary)',
+    tertiary: 'var(--color-figure-blue)'
+  }),
+  border: false,
+  hover: true,
+  loading: false,
+  onClick: () => {}
+})
+
+const defaultColors = {
+  primary: 'var(--color-fill-gray)',
+  secondary: 'var(--color-fill-tertiary)',
+  tertiary: 'var(--color-figure-blue)'
+}
+
+const computedStyle = computed(() => ({
+  '--color-figure': props.loading
+    ? defaultColors.primary
+    : props.colors?.primary,
+  '--color-figure-background': props.loading
+    ? defaultColors.secondary
+    : props.colors?.secondary,
+  '--color-figure-background-hover': props.loading
+    ? defaultColors.secondary
+    : props.colors?.tertiary,
+  '--color-figure-border':
+    props.loading || !props.border ? 'transparent' : props.colors?.tertiary
+}))
 </script>
 
 <style scoped>
+.loading {
+  pointer-events: none !important;
+}
+
 .badge {
   display: flex;
   align-items: center;
-  font-size: 11px;
-  line-height: 1.3333733333;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Helvetica Neue",
-    "Helvetica",
-    "Arial",
-    sans-serif;
-  padding-inline: 10px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   white-space: nowrap;
-  background: none;
-  border-radius: 18px;
+  background: var(--color-figure-background);
+  border-radius: 25px;
   border-style: solid;
-  border-width: 1px;
-  border-color: var(--color-figure);
+  border-color: var(--color-figure-border);
   color: var(--color-figure);
 }
 
-.small .badge {
+.badge.hover:hover {
+  transition: background-color 0.2s, color 0.2s;
+  border-color: var(--color-figure-border);
+  background-color: var(--color-figure-background-hover);
+  color: white;
+  cursor: pointer;
+}
+
+.badge.xsmall {
+  border-width: 0.5px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.badge.small {
+  border-width: 1px;
+  padding: 3px 11px;
   font-size: 12px;
   font-weight: 400;
 }
 
-.medium .badge {
-  font-size: 14px;
-  font-weight: 400;
+.badge.medium {
+  border-width: 1px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 450;
 }
 
-.large .badge {
+.badge.large {
+  border-width: 1.5px;
+  padding: 6px 14px;
+  font-size: 15px;
+  font-weight: 450;
+}
+
+.badge.xlarge {
+  border-width: 2px;
+  padding: 8px 16px;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
 }
 </style>

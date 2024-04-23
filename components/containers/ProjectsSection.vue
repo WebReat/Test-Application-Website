@@ -5,25 +5,38 @@
       class="typography-magical-headline pb-12"
     />
     <NavBarExtension>
-      <SegmentNav :index="currentIndex" @change="updateCurrentIndex" />
+      <div class="flex flex-col items-center gap-2">
+        <SegmentNav
+          :items="segmentNavItems"
+          padding="0 21px"
+          size="small"
+          separator
+          gray-labels
+          :outer-padding="3"
+          :selected-item="segmentNavItems[currentIndex]?.id"
+          :on-select="
+            id =>
+              updateCurrentIndex(
+                segmentNavItems.findIndex(item => item.id === id)
+              )
+          "
+        />
+      </div>
     </NavBarExtension>
-    <div class="timeline-wrapper" v-if="currentIndex === 0">
-      <TimeLine />
+    <div v-if="currentIndex === 0" class="timeline-wrapper">
+      <TimeLine :height="ulHeight" />
       <ul ref="ul" class="timeline">
         <CardItem
-          variant="article"
-          :size="
-            windowObject && windowObject.innerWidth < 900 ? 'small' : 'medium'
-          "
           v-for="(project, index) in currentProjects"
           :key="index"
+          variant="article"
+          :size="windowWidth < 900 ? 'small' : 'medium'"
+          :loading="false"
           :card="project"
-          :iconPosition="
-            windowObject && windowObject.innerWidth < 900 ? 'top' : 'left'
-          "
-          :dateFormatOptions="{
+          :icon-position="windowWidth < 900 ? 'top' : 'left'"
+          :date-format-options="{
             year: 'numeric',
-            month: 'long',
+            month: 'long'
           }"
         />
       </ul>
@@ -31,30 +44,35 @@
     <div v-else class="w-full">
       <div v-if="projects.personal.length && projects.school.length">
         <LiveResultSummary
-          :totalResults="currentProjects.length + pinned.length"
-          :pinnedResults="pinned.length"
+          :total-results="currentProjects.length + (pinnedProjects?.length ?? 0)"
+          :pinned-results="pinnedProjects ? pinnedProjects.length : 0"
         />
-        <ul v-if="pinned" class="card-container pinned-items">
+        <ul v-if="pinnedProjects" class="card-container pinned-items">
           <CardItem
             v-for="(card, index) in pinned"
             :key="index"
+            :loading="false"
             :card="card"
             size="small"
-            iconPosition="right"
+            icon-position="right"
+            icon-absolute
             class="color"
-            :style="`--color-figure: var(--color-figure-${randomColor});
-          --color-fill: var(--color-fill-${randomColor}-secondary)`"
+            :style="{
+              '--color-figure': `var(--color-figure-${randomColor})`,
+              '--color-fill': `var(--color-fill-${randomColor}-secondary)`
+            }"
           />
         </ul>
         <ul class="card-container">
           <CardItem
             v-for="(card, index) in currentProjects"
             :key="index"
+            :loading="false"
             :card="card"
             size="small"
-            iconPosition="right"
+            icon-position="right"
           />
-          <ResultBlankState v-if="!currentProjects" />
+          <ResultBlankState v-if="!currentProjects.length" />
         </ul>
       </div>
       <LoadingSpinner v-else class="center-horizontal center-vertical pt-24" />
@@ -62,104 +80,168 @@
   </div>
 </template>
 
-<script lang="ts">
-import type { ListUserReposResponse } from "~/types/GitHub/Repository";
-import type { CardItemType } from "~/types/common/CardItem";
+<script setup lang="ts">
+import type { ListUserReposResponse } from '~/types/GitHub/Repository'
+import type { CardItemType } from '~/types/common/CardItem'
+import type { ItemType } from '~/types/common/Option'
 
 type ListUserPinnedReposResponse = ListUserReposResponse & {
-  icon?: CardItemType["icon"];
-};
+  icon?: CardItemType['icon']
+}
 
 type Projects = {
-  swisscom: CardItemType[];
-  personal: ListUserReposResponse[];
-  school: ListUserReposResponse[];
-};
-</script>
+  swisscom: CardItemType[]
+  personal: ListUserReposResponse[]
+  school: ListUserReposResponse[]
+}
 
-<script setup lang="ts">
 defineProps<{
-  title: string;
-}>();
+  title: string
+}>()
 
-const { tm } = useI18n();
-const colorStore = useColor();
-const articles: Ref<CardItemType[]> = computed(() =>
-  tm("components.containers.projects")
-);
+const { $listUserRepositories, $listPinnedRepositories } = useNuxtApp()
+const { tm } = useI18n()
+const colorStore = useColor()
+const config = useRuntimeConfig()
+
+const ul = ref<HTMLElement | null>(null)
+const ulHeight = useElementSize(ul).height
+
+const pinned = ref<ListUserPinnedReposResponse[]>([])
+const currentIndex = ref(0)
+const randomColor = ref(colorStore.randomizeColor().colorName)
+const windowWidth = useWindowSize({ initialWidth: 0 }).width
+
+const { data: userRepositories } = useAsyncData(
+  'userRepositories',
+  () =>
+    $listUserRepositories({
+      username: config.public.githubRepoOwner,
+      perPage: 100
+    }),
+  { server: true }
+)
+
+const { data: pinnedProjects } = useAsyncData(
+  'pinnedProjects',
+  () =>
+    $listPinnedRepositories({
+      username: config.public.githubRepoOwner,
+      perPage: 100
+    }),
+  { server: true }
+)
+
 const projects: Projects = reactive({
-  swisscom: computed(() => tm("components.containers.projects")) as Ref<
-    CardItemType[]
-  >,
-  personal: [] as ListUserReposResponse[],
-  school: [] as ListUserReposResponse[],
-});
-const pinned: Ref<ListUserPinnedReposResponse[]> = ref([]);
+  swisscom: computed<CardItemType[]>(() =>
+    tm('components.containers.projects')
+  ),
+  personal: [],
+  school: []
+})
+
+const allProjects = computed(() => [...(userRepositories.value || [])])
+const filteredProjects = computed(() =>
+  allProjects.value.filter(
+    project =>
+      !pinned.value.find(pinnedProject => pinnedProject.name === project.name)
+  )
+)
+
 const currentProjects = computed(
   () =>
-    projects[Object.keys(projects)[currentIndex.value] as keyof typeof projects]
-);
+    $listPinnedRepositories({
+      username: config.public.githubRepoOwner,
+      perPage: 100
+    }),
+  { server: true }
+)
 
-const currentIndex: Ref<number> = ref(0);
-const randomColor = ref(colorStore.randomizeColor().colorName);
-const windowObject = computed(() => window);
+const segmentNavItems = computed<ItemType[]>(() => [
+  {
+    id: 'swisscom',
+    category: 'projects',
+    label: 'Swisscom',
+    icon: {
+      name: 'building.2.fill'
+    }
+  },
+  {
+    id: 'personal',
+    category: 'projects',
+    label: 'Persönlich',
+    icon: {
+      name: 'person.fill'
+    }
+  },
+  {
+    id: 'school',
+    category: 'projects',
+    label: 'Schule',
+    icon: {
+      name: 'graduationcap.fill'
+    }
+  }
+])
 
+const currentIndex = ref(0)
 const updateCurrentIndex = (index: number) => {
-  currentIndex.value = index;
-};
+  currentIndex.value = index
+}
 
 const categorizeProject = (project: ListUserReposResponse) => {
   const schoolProjectPattern =
-    /(M\d{3})|(UEK-\d{3})|(UEK-\d{3}-\w+)|((UEK|TBZ)-Modules)/;
+    /(M\d{3})|(UEK-\d{3})|(UEK-\d{3}-\w+)|((UEK|TBZ)-Modules)/
   const category = schoolProjectPattern.test(project.name)
-    ? "school"
-    : "personal";
-  return { ...project, category };
-};
+    ? 'school'
+    : 'personal'
+  return { ...project, category }
+}
 
-const fetchProjects = async () => {
-  const allProjects = await listUserRepositories({
-    username: "JonathanXDR",
-    perPage: 100,
-  });
+watch(
+  pinnedProjects,
+  newPinnedProjects => {
+    newPinnedProjects?.forEach((project: ListUserPinnedReposResponse) => {
+      project.icon = {
+        name: 'pin.fill',
+        colors: {
+          primary: `var(--color-figure-${randomColor.value})`
+        }
+      }
+    })
+    pinned.value = newPinnedProjects || []
+  },
+  { immediate: true }
+)
 
-  const pinnedProjects = await listPinnedRepositories({
-    username: "JonathanXDR",
-    perPage: 100,
-  });
-
-  pinnedProjects.forEach((project: ListUserPinnedReposResponse) => {
-    project.icon = {
-      name: "pin.fill",
-      colors: {
-        primary: `var(--color-figure-${randomColor.value})`,
-      },
-    };
-  });
-
-  const filteredProjects = allProjects.filter(
-    (project) =>
-      !pinnedProjects.find(
-        (pinnedProject) => pinnedProject.name === project.name
-      )
-  );
-
-  pinned.value = pinnedProjects;
-
-  filteredProjects.map(categorizeProject).forEach((project) => {
-    const category = project.category as keyof Projects;
+watchEffect(() => {
+  projects.personal = []
+  projects.school = []
+  filteredProjects.value.map(categorizeProject).forEach(project => {
+    const category = project.category as keyof Projects
     projects[category].push(
       project as ListUserReposResponse & CardItemType & { category: string }
-    );
-  });
-};
+    )
+  })
+})
 
-onMounted(() => {
-  fetchProjects();
-});
+const currentProjects = computed(
+  () =>
+    projects[segmentNavItems.value[currentIndex.value]?.id as keyof Projects]
+)
 </script>
 
 <style scoped>
+.highlight {
+  display: inline;
+}
+
+.highlight .match {
+  font-weight: 600;
+  /* color: var(--color-figure-gray-secondary-alt); */
+  background: var(--color-fill-light-blue-secondary);
+}
+
 /* ---------------------------- timeline-wrapper ---------------------------- */
 
 .timeline-wrapper {

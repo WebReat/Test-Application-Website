@@ -1,12 +1,12 @@
 <template>
   <div
-    :class="`message-item message-item--${direction}`"
     v-animation="{ add: 'active' }"
+    :class="`message-item message-item--${direction}`"
   >
     <div :class="`message message--${color}`">
       <p class="typography-imessage-text message-copy">
         <span class="visuallyhidden">Text message reading:&nbsp;</span> One sec.
-        <br class="small" />Moving to my iPhone.
+        <br class="small" >Moving to my iPhone.
       </p>
       <svg
         :class="`message-tail message-tail--${
@@ -19,12 +19,12 @@
           v-if="direction === 'left'"
           d="m32.84 55v-55h54v25.13c0 20.56-3.25 33.65-9.35 45.05-6.1 11.41-15.05 20.36-26.46 26.46s-24.5 9.35-45.05 9.35h-5.98c19.37-8.81 32.84-28.33 32.84-51z"
           fill="var(--bg-color)"
-        ></path>
+        />
         <path
           v-else
           d="m54 55v-55h-54v25.13c0 20.56 3.25 33.65 9.35 45.05 6.1 11.41 15.05 20.36 26.46 26.46s24.5 9.35 45.05 9.35h5.98c-19.37-8.81-32.84-28.33-32.84-51z"
           fill="var(--bg-color)"
-        ></path>
+        />
       </svg>
     </div>
   </div>
@@ -33,18 +33,17 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    color?: 'gray' | 'blue' | 'green';
-    direction?: 'left' | 'right';
+    color?: 'gray' | 'blue' | 'green'
+    direction?: 'left' | 'right'
   }>(),
   {
     color: 'gray',
-    direction: 'left',
+    direction: 'left'
   }
-);
+)
 </script>
 
 <style scoped>
-/*! CSS Used from: https://www.apple.com/api-www/global-elements/global-header/v1/assets/globalheader.css */
 .visuallyhidden {
   position: absolute;
   clip: rect(1px, 1px, 1px, 1px);
@@ -55,7 +54,7 @@ withDefaults(
   padding: 0;
   border: 0;
 }
-/*! CSS Used from: https://www.apple.com/v/icloud/af/built/styles/main.built.css */
+
 p {
   margin: 0;
   padding: 0;
@@ -92,18 +91,14 @@ br.small {
 }
 .typography-imessage-text {
   font-size: 49px;
-  line-height: 1.2448979592;
   font-weight: 400;
-  letter-spacing: 0.013em;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
 }
 @media only screen and (max-width: 1068px) {
   .typography-imessage-text {
     font-size: 34px;
-    line-height: 1.1176470588;
     font-weight: 400;
-    letter-spacing: 0.013em;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
@@ -111,14 +106,12 @@ br.small {
 @media only screen and (max-width: 734px) {
   .typography-imessage-text {
     font-size: 19px;
-    line-height: 1.1053231579;
     font-weight: 400;
-    letter-spacing: 0.013em;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
       'Helvetica', 'Arial', sans-serif;
   }
 }
-/*! CSS Used from: https://www.apple.com/v/icloud/af/built/styles/overview.built.css */
+
 .awy-messages p {
   color: #6e6e73;
 }
@@ -420,7 +413,7 @@ br.small {
     --p-height: 82px;
   }
 }
-/*! CSS Used keyframes */
+
 @keyframes message-item-exit {
   0% {
     transform: translateX(0);

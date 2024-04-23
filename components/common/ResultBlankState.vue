@@ -7,17 +7,9 @@
 <style scoped>
 .no-results {
   font-size: 21px;
-  line-height: 1.381002381;
   font-weight: 400;
-  /* letter-spacing: 0.011em; */
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Helvetica Neue",
-    "Helvetica",
-    "Arial",
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
@@ -30,17 +22,9 @@
 @media only screen and (max-width: 735px) {
   .no-results {
     font-size: 19px;
-    line-height: 1.4211026316;
     font-weight: 400;
-    /* letter-spacing: 0.012em; */
-    font-family:
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Helvetica Neue",
-      "Helvetica",
-      "Arial",
-      sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+      'Helvetica', 'Arial', sans-serif;
   }
 }
 </style>
