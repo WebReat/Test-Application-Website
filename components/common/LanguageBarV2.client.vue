@@ -1,12 +1,12 @@
 <template>
   <div class="rs-od-iteminfo">
-    <h2 class="rs-od-itemtitle">
+    <!-- <h2 class="rs-od-itemtitle">
       <span class="rs-od-itemshortname">{{ language.eyebrow }} </span>
       <span class="rs-od-itemstatus">{{ language.title }}</span>
     </h2>
     <div class="rs-od-delivery-actions">
       <LinkCollection :links="language.links" />
-    </div>
+    </div> -->
     <InfoBar :info="language.info" />
     <div
       id="rs-tracker-orderDetail.orderItems.orderItem-0000101.orderItemStatusTracker"
@@ -17,7 +17,7 @@
           <div
             class="rs-tracker-fill"
             :style="`width: ${language.progress}%`"
-          ></div>
+          />
         </div>
         <ol class="rs-tracker-status">
           <!-- <li
@@ -37,37 +37,37 @@
         </ol>
       </div>
     </div>
-    <div class="row rs-od-itemdesc-wrapper">
+    <!-- <div class="row rs-od-itemdesc-wrapper">
       <div class="rs-od-itemdesc column large-12 small-12">
         <div class="rs-od-itemdesc-content">
           {{ language.description }}
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import type { LanguageBarType } from "~/types/common/LanguageBar";
+import type { LanguageBarType } from '~/types/common/LanguageBar'
 
 withDefaults(
   defineProps<{
-    language: LanguageBarType;
+    language: LanguageBarType
   }>(),
   {
     language: () => {
-      return {} as LanguageBarType;
-    },
+      return {} as LanguageBarType
+    }
   }
-);
+)
 
 const status = [
-  "Order Placed",
-  "Processing",
-  "Preparing to Ship",
-  "Shipped",
-  "Delivered",
-];
+  'Order Placed',
+  'Processing',
+  'Preparing to Ship',
+  'Shipped',
+  'Delivered'
+]
 </script>
 
 <style scoped>
@@ -121,11 +121,9 @@ const status = [
 
 .rs-od-item .rs-od-iteminfo {
   font-size: 14px;
-  line-height: 1.42859;
   font-weight: 400;
-  letter-spacing: -0.016em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", "Arial", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   margin: auto 0;
 }
 @media only screen and (max-width: 1023px) and (max-device-width: 736px) {
@@ -144,44 +142,35 @@ const status = [
   }
 }
 .rs-od-itemtitle {
-  line-height: 0.5;
 }
 .rs-od-itemshortname {
   font-size: 12px;
-  line-height: 1.33337;
   font-weight: 400;
-  letter-spacing: -0.01em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", "Arial", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
 }
 .rs-od-itemstatus {
   font-size: 32px;
-  line-height: 1.125;
   font-weight: 600;
-  letter-spacing: 0.004em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", "Arial", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   display: block;
   padding-top: 6px;
 }
 @media only screen and (max-width: 1023px) and (max-device-width: 736px) {
   .rs-od-itemstatus {
     font-size: 28px;
-    line-height: 1.14286;
     font-weight: 600;
-    letter-spacing: 0.007em;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-      "Helvetica", "Arial", sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+      'Helvetica', 'Arial', sans-serif;
   }
 }
 @media only screen and (max-width: 1023px) and (max-device-width: 736px) {
   .rs-od-itemstatus {
     font-size: 24px;
-    line-height: 1.16667;
     font-weight: 600;
-    letter-spacing: 0.009em;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-      "Helvetica", "Arial", sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+      'Helvetica', 'Arial', sans-serif;
   }
 }
 @media only screen and (max-width: 1023px) and (max-device-width: 736px) {
@@ -199,11 +188,9 @@ const status = [
 }
 .rs-od-itemdesc-wrapper .rs-od-itemdesc {
   font-size: 17px;
-  line-height: 1.47059;
   font-weight: 400;
-  letter-spacing: -0.022em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", "Arial", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
 }
 @media only screen and (max-width: 1023px) and (max-device-width: 736px) {
   .rs-od-itemdesc-wrapper .rs-od-itemdesc {
@@ -234,11 +221,9 @@ const status = [
 }
 .rs-tracker .rs-tracker-status {
   font-size: 12px;
-  line-height: 1.33337;
   font-weight: 400;
-  letter-spacing: -0.01em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", "Arial", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   color: var(--color-figure-gray-secondary);
   margin: 12px 0;
   width: inherit;
@@ -277,11 +262,9 @@ const status = [
 }
 .rs-od-delivery-actions {
   font-size: 17px;
-  line-height: 1.47059;
   font-weight: 400;
-  letter-spacing: -0.022em;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", "Arial", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   display: flex;
   align-items: flex-end;
   padding: 8px 0 2px;

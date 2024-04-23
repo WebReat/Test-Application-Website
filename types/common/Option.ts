@@ -1,4 +1,8 @@
-export interface OptionType {
-  id: string;
-  label: string;
+import type { IconType } from './Icon'
+
+export interface ItemType {
+  id: string
+  category?: string
+  label?: string
+  icon?: IconType
 }

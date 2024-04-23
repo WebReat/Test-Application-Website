@@ -1,33 +1,30 @@
 <template>
   <input
-    @input="toggleNav()"
+    id="ac-ln-menustate"
     v-model="navOpen"
     type="checkbox"
-    id="ac-ln-menustate"
     :disabled="navDisabled"
-  />
-  <div id="ac-ln-sticky-placeholder" class="ac-ln-sticking"></div>
+    @input="toggleNav()"
+  >
+  <div id="ac-ln-sticky-placeholder" class="ac-ln-sticking"/>
   <nav
     id="ac-localnav"
-    class="ac-localnav-dark ac-localnav-noborder ac-ln-sticking"
-    :class="{ 'nav-open': navOpen }"
+    :class="[
+      'ac-localnav-dark ac-localnav-noborder ac-ln-sticking',
+      { 'nav-open': navOpen }
+    ]"
   >
     <div class="ac-ln-wrapper">
       <div
         ref="ac-ln-background"
         class="ac-ln-background ac-ln-background-transition"
-      ></div>
+      />
       <div class="ac-ln-content">
         <div class="ac-ln-title">
           <NuxtLink to="/" class="ac-ln-title">
             <Logo />
           </NuxtLink>
-          <small
-            v-if="nodeEnv === 'development'"
-            :style="{ color: colorBadge?.colorVar }"
-            class="dev-badge"
-            data-tag-name="Dev"
-          ></small>
+          <DevBadge />
         </div>
         <div class="ac-ln-menu">
           <div class="ac-ln-menu-tray">
@@ -39,96 +36,129 @@
               >
                 <NuxtLink
                   :to="item.route"
-                  :class="{ current: index === currentSectionIndex }"
-                  class="ac-ln-menu-link"
+                  :class="[
+                    'ac-ln-menu-link',
+                    { current: index === currentSectionIndex }
+                  ]"
                 >
                   {{ item.name }}
                 </NuxtLink>
               </li>
-              <!-- <LanguagePickerBar :introText="false" :shortForm="true" /> -->
             </ul>
           </div>
           <div class="ac-ln-actions">
             <div class="ac-ln-action ac-ln-action-menucta">
               <label for="ac-ln-menustate" class="ac-ln-menucta">
-                <span class="ac-ln-menucta-chevron"></span>
+                <span class="ac-ln-menucta-chevron"/>
               </label>
             </div>
-            <!-- <ColorSchemeToggle /> -->
-            <ThemeNav gap="10px" padding="0 10px" size="xsmall" separator />
+            <SegmentNav
+              :items="themeItems"
+              gap="5px"
+              size="xsmall"
+              :label="windowWidth < 900 ? 'icon' : 'text'"
+              :selected-item="getTheme()"
+              :on-select="newTheme => setTheme(newTheme)"
+            />
             <LanguagePickerDropdown />
           </div>
         </div>
       </div>
     </div>
   </nav>
-  <label id="ac-ln-curtain" for="ac-ln-menustate"></label>
+  <label id="ac-ln-curtain" for="ac-ln-menustate"/>
 </template>
 
 <script setup lang="ts">
-import { type SectionType } from '~/types/common/Section';
+import type { ItemType } from '~/types/common/Option'
+import { type SectionType } from '~/types/common/Section'
 
-const { tm } = useI18n();
-const items: Ref<SectionType[]> = computed(() =>
-  tm('components.common.NavBar')
-);
-const themeDark: Ref<boolean> = ref(false);
-const navOpen: Ref<boolean> = ref(false);
-const navDisabled: Ref<boolean> = ref(false);
-const nodeEnv = computed(() => process.env.NODE_ENV);
+const { locale, tm, rt } = useI18n()
+const items = computed<SectionType[]>(() => tm('components.common.NavBar'))
+const navOpen = ref(false)
+const navDisabled = ref(false)
 
-const { colorBadge } = useColor();
-const { currentSection } = useSection();
-const { getTheme } = useTheme();
-const currentSectionIndex = computed(() => currentSection.value.index);
+const { currentSection } = useSection()
+const { getTheme, setTheme } = useTheme()
+const currentSectionIndex = computed(() => currentSection.value.index)
+const { width: windowWidth } = useWindowSize({ initialWidth: 0 })
+const { headerAnimations } = useAnimation()
 
-const headerAnimations = computed(() => {
-  useAnimation().setHeaderAnimation({
+const themeItems = computed<ItemType[]>(() => [
+  {
+    id: 'light',
+    category: 'theme',
+    label: 'Light',
+    icon: {
+      name: 'sun.max.fill'
+    }
+  },
+  {
+    id: 'dark',
+    category: 'theme',
+    label: 'Dark',
+    icon: {
+      name: 'moon.fill'
+    }
+  },
+  {
+    id: 'auto',
+    category: 'theme',
+    label: 'Auto',
+    icon: {
+      name: 'circle.lefthalf.filled'
+    }
+  }
+])
+
+const initHeaderAnimations = () => {
+  const animation = {
     element: document.querySelector('.ac-ln-background') as HTMLElement,
     class: 'ac-ln-background-transition',
-    timeout: 500,
-  });
-
-  return useAnimation().headerAnimations;
-});
+    timeout: 500
+  }
+  const { setHeaderAnimation } = useAnimation()
+  setHeaderAnimation(animation)
+}
 
 const toggleNav = () => {
-  navOpen.value = !navOpen.value;
-  checkboxTimeout();
-};
+  navOpen.value = !navOpen.value
+  checkboxTimeout()
+}
 
 const checkboxTimeout = () => {
-  navDisabled.value = true;
+  navDisabled.value = true
   setTimeout(() => {
-    navDisabled.value = false;
-  }, 1000);
-};
+    navDisabled.value = false
+  }, 1000)
+}
 
 const handleScroll = () => {
   if (navOpen.value && window.scrollY > 0) {
-    navOpen.value = false;
+    navOpen.value = false
   }
-};
+}
 
 const updateAnimations = () => {
-  headerAnimations.value.value.forEach((element) => {
-    element.element.classList.remove(element.class);
+  headerAnimations.value.forEach(element => {
+    element.element.classList.remove(element.class)
 
     setTimeout(() => {
-      element.element.classList.add(element.class);
-    }, element.timeout);
-  });
-};
+      element.element.classList.add(element.class)
+    }, element.timeout)
+  })
+}
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll);
+  initHeaderAnimations()
+  window.addEventListener('scroll', handleScroll)
 
   watch(getTheme, (newTheme, oldTheme) => {
     if (newTheme !== oldTheme) {
-      updateAnimations();
+      updateAnimations()
     }
-  });
-});
+  })
+})
 </script>
 
 <style scoped>
@@ -243,26 +273,6 @@ onMounted(() => {
   }
 }
 
-/* ------------------------------- Dev Badge ------------------------------- */
-
-.dev-badge {
-  font-size: 22.588px;
-  line-height: 1.16667;
-  font-weight: 600;
-  /* letter-spacing: 0.009em; */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
-    'Helvetica', 'Arial', sans-serif;
-  padding-left: 10px;
-  -webkit-transition: color 0.5s cubic-bezier(0.28, 0.11, 0.32, 1);
-  -o-transition: color 0.5s cubic-bezier(0.28, 0.11, 0.32, 1);
-  -moz-transition: color 0.5s cubic-bezier(0.28, 0.11, 0.32, 1);
-  transition: color 0.5s cubic-bezier(0.28, 0.11, 0.32, 1);
-}
-
-.dev-badge:before {
-  content: attr(data-tag-name);
-}
-
 /* ------------------------------ ac-ln-actions ----------------------------- */
 
 .ac-ln-actions {
@@ -363,9 +373,7 @@ onMounted(() => {
 .ac-ln-menu {
   height: 100%;
   font-size: 14px;
-  line-height: 1;
   font-weight: 600;
-  /* letter-spacing: -0.02em; */
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
     'Helvetica', 'Arial', sans-serif;
   float: right;
@@ -536,7 +544,6 @@ onMounted(() => {
 
 .ac-ln-menu-link {
   display: inline-block;
-  line-height: 22px;
   white-space: nowrap;
   opacity: 0.92;
 }
@@ -553,7 +560,6 @@ onMounted(() => {
     display: flex;
     align-items: center;
     height: 100%;
-    line-height: 1.3;
     opacity: 0;
     transform: translate3d(0, -25px, 0);
     transition: 0.5s ease;
@@ -719,91 +725,5 @@ a:disabled {
     width: 100% !important;
     height: 100% !important;
   }
-}
-
-/* ------------------------------ Theme Button ------------------------------ */
-
-.theme-button {
-  min-width: 145px;
-  min-height: 74px;
-  border-radius: 40px;
-  transform: scale(0.3);
-  border: solid var(--color-menu-border);
-  border-width: 3px;
-  box-sizing: content-box;
-  margin: -26px -52px;
-}
-
-.btn-input {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: 0;
-  cursor: pointer;
-  opacity: 0;
-  z-index: 2;
-}
-
-input[type='checkbox']#active {
-  width: 0;
-  height: 0;
-}
-
-.theme-button span {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  overflow: hidden;
-  opacity: 1;
-  background: #fff;
-  border-radius: 40px;
-  transition: 0.2s ease background, 0.2s ease opacity;
-}
-
-.theme-button span:after,
-.theme-button span:before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  transition: 0.5s ease transform, 0.2s ease background;
-}
-
-.theme-button span:before {
-  background: #fff;
-  transform: translate(-58px, 0);
-  z-index: 1;
-}
-
-.theme-button span:after {
-  background: #000;
-  transform: translate(8px, 0);
-  z-index: 0;
-}
-
-.theme-button input[type='checkbox']:checked + span {
-  background: #000;
-}
-
-.theme-button input[type='checkbox']:active + span {
-  opacity: 0.5;
-}
-
-.theme-button input[type='checkbox']:checked + span:before {
-  background: #000;
-  transform: translate(56px, -19px);
-}
-
-.theme-button input[type='checkbox']:checked + span:after {
-  background: #fff;
-  transform: translate(79px, 0);
 }
 </style>

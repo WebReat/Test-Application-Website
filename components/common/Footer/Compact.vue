@@ -7,23 +7,15 @@
 </template>
 
 <script setup lang="ts">
-const currentYear = ref(new Date().getFullYear());
+const currentYear = ref(new Date().getFullYear())
 </script>
 
 <style scoped>
 .rs-covers-footer {
   font-size: 12px;
-  line-height: 1.33337;
   font-weight: 400;
-  /* letter-spacing: -0.01em; */
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Helvetica Neue",
-    "Helvetica",
-    "Arial",
-    sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    'Helvetica', 'Arial', sans-serif;
   color: var(--color-figure-gray-secondary);
   display: flex;
   align-items: center;
@@ -31,16 +23,11 @@ const currentYear = ref(new Date().getFullYear());
   min-height: 36px;
 }
 
-.nojs .rs-covers-footercontent {
-  padding-top: 20px;
-}
-
 .as-l-container {
   margin-left: auto;
   margin-right: auto;
   width: 980px;
 }
-
 @media only screen and (min-width: 1441px) {
   .as-l-container {
     margin-left: auto;
@@ -48,12 +35,17 @@ const currentYear = ref(new Date().getFullYear());
     width: 980px;
   }
 }
-
 @media only screen and (max-width: 1068px) {
   .as-l-container {
     margin-left: auto;
     margin-right: auto;
-    width: 94.14966%;
+    width: 692px;
+  }
+}
+@media only screen and (max-width: 734px) {
+  .as-l-container {
+    margin-left: auto;
+    margin-right: auto;
     width: 87.5%;
   }
 }

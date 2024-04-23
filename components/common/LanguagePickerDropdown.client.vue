@@ -1,9 +1,12 @@
 <template>
-  <div class="language-picker-dropdown">
+  <div
+    class="language-picker-dropdown"
+    :style="{ 'font-size': `${fontSize}px` }"
+  >
     <div class="dropdown-container legacy-form">
       <select
-        class="dropdown-select"
         v-model="selectedLocale"
+        class="dropdown-select"
         @change="changeLanguage(selectedLocale)"
       >
         <option
@@ -11,28 +14,48 @@
           :key="locale.code"
           :value="locale.code"
         >
-          {{ locale.name }}
+          {{ windowWidth < 900 ? locale.code.toUpperCase() : locale.name }}
         </option>
       </select>
-      <Icon name="chevron.down" class="icon icon-small" />
+      <Icon name="chevron.down" :class="`icon icon-${size}`" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const { changeLanguage } = useLanguage();
-const { locale, locales } = useI18n({ useScope: "global" });
-const selectedLocale = ref(locale.value);
+const props = withDefaults(
+  defineProps<{
+    size?: 'xsmall' | 'small' | 'medium' | 'large'
+  }>(),
+  {
+    size: 'small'
+  }
+)
+
+const { changeLanguage } = useLanguage()
+const { locale, locales } = useI18n()
+const selectedLocale = ref(locale.value)
+const { width: windowWidth } = useWindowSize({ initialWidth: 0 })
 
 const computedLocales = computed(() =>
-  locales.value.map((l) => {
-    return typeof l === "string" ? { code: l, name: l } : l;
+  locales.value.map(l => {
+    return typeof l === 'string' ? { code: l, name: l } : l
   })
-);
+)
 
-watch(locale, (newLocale) => {
-  selectedLocale.value = newLocale;
-});
+const fontSize = computed(() => {
+  const sizes: Record<string, number> = {
+    xsmall: 12,
+    small: 14,
+    medium: 16,
+    large: 18
+  }
+  return sizes[props.size || 'medium']
+})
+
+watch(locale, newLocale => {
+  selectedLocale.value = newLocale
+})
 </script>
 
 <style scoped>
@@ -54,7 +77,6 @@ watch(locale, (newLocale) => {
 .dropdown-select {
   color: var(--color-figure-blue);
   font-weight: 600;
-  line-height: 1.333333;
   display: inline;
   direction: rtl;
   width: auto;
@@ -68,13 +90,11 @@ watch(locale, (newLocale) => {
 
 .language-picker-dropdown {
   display: inline-block;
-  font-size: 12px;
 }
 
 .language-picker-dropdown select {
   color: var(--color-figure-blue);
   font-weight: 600;
-  line-height: 1.333333;
   display: inline;
   direction: rtl;
   width: auto;
@@ -89,7 +109,6 @@ watch(locale, (newLocale) => {
 .dropdown-arrow {
   position: absolute;
   right: 0;
-  line-height: 1.3;
   pointer-events: none;
 }
 
@@ -102,7 +121,6 @@ watch(locale, (newLocale) => {
 .dropdown-container select {
   color: var(--color-figure-blue);
   font-weight: 600;
-  line-height: 1.333333;
   display: inline;
   direction: rtl;
   width: initial;

@@ -1,42 +1,56 @@
 <template>
   <div
-    ref="themeNavContainer"
-    class="viewer-sizenav all-access-pass__background"
+    ref="navContainer"
+    :class="['viewer-sizenav all-access-pass__background', { shadow }]"
     :style="containerStyle"
   >
-    <div class="viewer-sizenav__bubble">
-      <div class="viewer-sizenav__bubble-inner" :style="bubbleStyle"></div>
+    <div v-if="selectedItemElement" class="viewer-sizenav__bubble">
+      <div class="viewer-sizenav__bubble-inner" :style="bubbleStyle"/>
     </div>
-    <ul class="viewer-sizenav-items" role="radiogroup" :style="{ gap: gap }">
+    <ul
+      class="viewer-sizenav-items"
+      role="radiogroup"
+      :style="{ '--viewer-sizenav-items-gap': gap }"
+    >
       <li
         v-for="(item, index) in items"
         :key="index"
-        class="viewer-sizenav-item"
-        :class="{ separator: separator }"
         :ref="(setItemRef as any)"
+        :class="['viewer-sizenav-item', { separator }]"
       >
         <input
           :id="`viewer-sizenav-value-${item.id}`"
+          v-model="selectedItem"
           type="radio"
-          name="viewer-sizenav-value"
-          class="viewer-sizenav-value"
+          :name="`viewer-sizenav-value-${item.category}`"
+          :class="['viewer-sizenav-value', { focus }]"
           :value="item.id"
-          v-model="selectedTheme"
-        />
+          :disabled="item.id !== selectedItem && isTransitioning"
+        >
         <label
           :for="`viewer-sizenav-value-${item.id}`"
           class="viewer-sizenav-link"
           :style="{
-            'min-width': props.label !== 'icon' ? '48px' : `${height - 8}px`,
+            'min-width':
+              props.label !== 'icon' ? '48px' : `${height - outerPadding * 2}px`
           }"
         >
           <span
             :class="`viewer-sizenav-swatch viewer-sizenav-swatch-${item.id}`"
           >
-            <span class="viewer-sizenav-label" :style="{ padding: padding }">
+            <span
+              class="viewer-sizenav-label"
+              :style="{
+                padding: padding,
+                color: grayLabels
+                  ? 'var(--color-fill-gray-secondary)'
+                  : 'var(--aap-icon-color)',
+                'font-size': `${fontSize}px`
+              }"
+            >
               <Icon
-                v-if="label !== 'text'"
-                :name="item.icon"
+                v-if="item.icon && label !== 'text'"
+                :name="item.icon.name"
                 class="icon icon-large"
               />
               <div v-if="label !== 'icon'">{{ item.label }}</div>
@@ -49,88 +63,115 @@
 </template>
 
 <script setup lang="ts">
+import type { ItemType } from '~/types/common/Option'
+
 const props = withDefaults(
   defineProps<{
-    size?: 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge';
-    label?: 'icon' | 'text' | 'combination';
-    separator?: boolean;
-    gap?: string;
-    padding?: string;
+    items: ItemType[]
+    size?: 'xsmall' | 'small' | 'medium' | 'large'
+    label?: 'icon' | 'text' | 'combination'
+    focus?: boolean
+    separator?: boolean
+    shadow?: boolean
+    grayLabels?: boolean
+    gap?: string
+    padding?: string
+    outerPadding?: number
+    selectedItem?: string
+    onSelect?: (id: string) => void
   }>(),
   {
     size: 'medium',
     label: 'text',
+    focus: true,
     separator: false,
-    gap: '0',
-    padding: (props) => {
-      return props.label !== 'icon' ? '0 8px' : '0';
+    shadow: false,
+    grayLabels: false,
+    gap: '0px',
+    padding: props => {
+      return props.label !== 'icon' ? '0 8px' : '0'
     },
+    outerPadding: 4,
+    selectedItem: props => {
+      return props.items[0].id
+    },
+    onSelect: () => {}
   }
-);
+)
 
-const { getTheme, setTheme } = useTheme();
-const selectedTheme = ref<string>(getTheme());
-const isTransitioning = ref<boolean>(false);
+const selectedItem = ref<string>(props.selectedItem)
+const isTransitioning = ref<boolean>(false)
 
-const items = [
-  { id: 'light', label: 'Light', icon: 'sun.max.fill' },
-  { id: 'dark', label: 'Dark', icon: 'moon.fill' },
-  { id: 'auto', label: 'Auto', icon: 'circle.lefthalf.filled' },
-];
-
-const themeNavContainer = ref<HTMLElement | null>(null);
-const itemElements = ref<Array<HTMLElement>>([]);
+const navContainer = ref<HTMLElement | null>(null)
+const itemElements = ref<Array<HTMLElement>>([])
+const selectedItemElement = ref<HTMLElement | null>(null)
 
 const setItemRef = (el: HTMLElement | null) => {
-  if (el) itemElements.value.push(el);
-};
+  if (el) itemElements.value.push(el)
+}
 
 const updateBubblePosition = () => {
-  isTransitioning.value = true;
-  const selectedItemIndex = items.findIndex(
-    (item) => item.id === selectedTheme.value
-  );
-  const selectedItemElement = itemElements.value[selectedItemIndex];
-  if (selectedItemElement) {
+  isTransitioning.value = true
+  const selectedItemIndex = props.items.findIndex(
+    item => item.id === selectedItem.value
+  )
+  selectedItemElement.value = itemElements.value[selectedItemIndex]
+  if (selectedItemElement.value) {
     bubbleStyle.value = {
-      '--bubble-position': `${selectedItemElement.offsetLeft}px`,
-      '--bubble-width': `${selectedItemElement.offsetWidth}px`,
-      opacity: '1',
-    };
+      '--bubble-position': `${selectedItemElement?.value?.offsetLeft}px`,
+      '--bubble-width': `${selectedItemElement?.value?.offsetWidth}px`,
+      opacity: '1'
+    }
   }
 
-  setTimeout(() => (isTransitioning.value = false), 400);
-};
+  setTimeout(() => (isTransitioning.value = false), 400)
+}
 
-const bubbleStyle = ref<Record<string, string>>({});
+const bubbleStyle = ref<Record<string, string>>({})
 
 const height = computed(() => {
   const sizes: Record<string, number> = {
     xsmall: 32,
     small: 40,
     medium: 48,
-    large: 56,
-    xlarge: 64,
-  };
-  return sizes[props.size || 'medium'];
-});
+    large: 56
+  }
+  return sizes[props.size || 'medium']
+})
+
+const fontSize = computed(() => {
+  const sizes: Record<string, number> = {
+    xsmall: 12,
+    small: 14,
+    medium: 16,
+    large: 18
+  }
+  return sizes[props.size || 'medium']
+})
 
 const containerStyle = computed(() => ({
-  width: `${themeNavContainer.value?.offsetWidth}px`,
-  '--sizenav-width': `${themeNavContainer.value?.offsetWidth}px`,
-  '--aap-min-height': `${height.value}px`,
-}));
+  width: `fit-content`,
+  '--sizenav-width': `${navContainer.value?.offsetWidth}px`,
+  '--sizenav-outer-padding': `${props?.outerPadding}px`,
+  '--aap-min-height': `${height.value}px`
+}))
 
 watch(
-  selectedTheme,
-  (newTheme) => {
-    setTheme(newTheme);
-    updateBubblePosition();
+  selectedItem,
+  newItem => {
+    props.onSelect(newItem)
+    updateBubblePosition()
   },
   { immediate: true }
-);
+)
 
-onMounted(updateBubblePosition);
+onMounted(updateBubblePosition)
+
+useResizeObserver(navContainer, () => {
+  nextTick(() => {
+    updateBubblePosition()
+  })
+})
 </script>
 
 <style scoped>
@@ -146,13 +187,17 @@ onMounted(updateBubblePosition);
   content: '';
   display: block;
   position: absolute;
-  left: -7px;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 3px;
-  height: 3px;
-  border-radius: 100%;
-  background-color: var(--color-code-plain);
+  top: 0;
+  bottom: 0;
+  left: calc(
+    0px - (var(--viewer-sizenav-items-separator) / 2) -
+      (var(--viewer-sizenav-items-gap) / 2) - (var(--sizenav-outer-padding) / 2)
+  );
+  margin: auto;
+  width: var(--viewer-sizenav-items-separator);
+  height: var(--viewer-sizenav-items-separator);
+  border-radius: 100px;
+  background: var(--color-code-plain);
   transition: transform 350ms;
 }
 .viewer-sizenav-item.separator:first-child {
@@ -164,7 +209,7 @@ onMounted(updateBubblePosition);
 .viewer-sizenav-item.separator:has(.viewer-sizenav-value:checked)
   + .viewer-sizenav-item.separator::before,
 .viewer-sizenav-item.separator:has(.viewer-sizenav-value:checked)::before {
-  transform: translate(-50%, -50%) scale(0);
+  transform: scale(0);
 }
 
 .all-access-pass__background {
@@ -173,12 +218,14 @@ onMounted(updateBubblePosition);
   /* background-color: var(--aap-background-color); */
   background-color: var(--color-fill-tertiary);
   border-radius: 32px;
-  box-shadow: inset 0 0 1px var(--aap-inner-glow-color);
   color: var(--aap-text-color);
   display: flex;
   will-change: transform;
   z-index: 1;
   transition: linear var(--aap-background-transition-duration) background-color;
+}
+.all-access-pass__background.shadow {
+  box-shadow: inset 0 0 1px var(--aap-inner-glow-color);
 }
 .all-access-pass__background.viewer-sizenav {
   --sizenav-width: 0px;
@@ -194,9 +241,12 @@ onMounted(updateBubblePosition);
 .viewer-sizenav {
   --bubble-position: 0;
   --bubble-scale: 0;
-  --bubble-width: calc(var(--aap-min-height) - 8px);
+  --bubble-width: calc(
+    var(--aap-min-height) - calc(var(--sizenav-outer-padding) * 2)
+  );
   --bubble-hint-position: 0;
   --sizenav-width: 0px;
+  --sizenav-outer-padding: 0px;
   --toggle-color: 0;
   --ltr: 1;
 
@@ -210,6 +260,7 @@ onMounted(updateBubblePosition);
   --aap-margin: 30px;
   --aap-margin-bottom: 100px;
   --aap-background-transition-duration: 250ms;
+  --viewer-sizenav-items-separator: 3px;
   -webkit-user-select: none;
   user-select: none;
   pointer-events: all;
@@ -219,24 +270,28 @@ onMounted(updateBubblePosition);
     10;
   border-radius: 28px;
   box-sizing: border-box;
-  height: calc(100% - 8px);
-  left: 4px;
+  height: calc(100% - calc(var(--sizenav-outer-padding) * 2));
+  left: var(--sizenav-outer-padding);
   pointer-events: none;
   position: absolute;
-  top: 4px;
+  top: var(--sizenav-outer-padding);
   transform: translateX(
       calc(var(--bubble-hint-position) * 1px + var(--aap-offset) * 1px)
     )
     scaleY(calc(1 - var(--abs-calc) * 0.15));
   transform-origin: center center;
   transition: transform 200ms ease-out;
-  width: calc(100% - 8px);
+  width: calc(100% - calc(var(--sizenav-outer-padding) * 2));
 }
 .viewer-sizenav__bubble-inner {
-  height: calc(var(--aap-min-height) - 8px);
-  min-width: calc(var(--aap-min-height) - 8px);
+  height: calc(var(--aap-min-height) - calc(var(--sizenav-outer-padding) * 2));
+  min-width: calc(
+    var(--aap-min-height) - calc(var(--sizenav-outer-padding) * 2)
+  );
   opacity: 1;
-  transform: translateX(calc(var(--bubble-position) - 4px));
+  transform: translateX(
+    calc(var(--bubble-position) - var(--sizenav-outer-padding))
+  );
   transition: transform 400ms ease, width 400ms ease;
   width: var(--bubble-width);
   will-change: transform;
@@ -269,13 +324,15 @@ onMounted(updateBubblePosition);
   justify-content: center;
   list-style: none;
   margin-inline-start: 0;
-  padding: 0 3px;
+  padding: 0 calc(var(--sizenav-outer-padding) / 1.33333333333);
   pointer-events: auto;
+  gap: var(--viewer-sizenav-items-gap);
 }
 .viewer-sizenav-item {
-  margin-left: 2px;
-  margin-right: 2px;
+  margin-left: calc(var(--sizenav-outer-padding) / 2);
+  margin-right: calc(var(--sizenav-outer-padding) / 2);
 }
+
 .viewer-sizenav-link {
   align-items: center;
   background-color: rgba(0, 0, 0, 0);
@@ -283,7 +340,7 @@ onMounted(updateBubblePosition);
   box-sizing: border-box;
   cursor: pointer;
   display: flex;
-  height: calc(var(--aap-min-height) - 8px);
+  height: calc(var(--aap-min-height) - calc(var(--sizenav-outer-padding) * 2));
   justify-content: center;
   transition: background-color 0.25s ease, box-shadow 0.3s ease;
   width: auto;
@@ -297,17 +354,15 @@ onMounted(updateBubblePosition);
 .viewer-sizenav-label {
   align-items: center;
   /* color: var(--aap-icon-color); */
-  color: var(--color-fill-gray-secondary);
+  /* color: var(--color-fill-gray-secondary); */
   display: flex;
   /* font-size: 16px; */
-  font-size: 12px;
+  /* font-size: 12px; */
   font-weight: 600;
   height: 100%;
   justify-content: center;
-  letter-spacing: -0.35px;
-  line-height: 21px;
   transition: color 200ms cubic-bezier(0.53, -0.01, 0.17, 1);
-  width: auto;
+  width: fit-content;
   gap: 5px;
 }
 .viewer-sizenav-value {
@@ -327,10 +382,10 @@ onMounted(updateBubblePosition);
   .viewer-sizenav-swatch
   .viewer-sizenav-label {
   /* color: var(--aap-icon-color-alt); */
-  color: var(--color-fill-tertiary);
+  color: var(--color-fill-tertiary) !important;
   transition: color 400ms cubic-bezier(0.53, -0.01, 0.17, 1);
 }
-.viewer-sizenav-value:focus ~ .viewer-sizenav-link {
+.viewer-sizenav-value.focus:focus ~ .viewer-sizenav-link {
   box-shadow: 0 0 0 3px #fff, 0 0 0 5px #0071e3;
 }
 * {
